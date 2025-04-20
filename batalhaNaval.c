@@ -1,40 +1,154 @@
 #include <stdio.h>
 
-// Desafio Batalha Naval - MateCheck
-// Este código inicial serve como base para o desenvolvimento do sistema de Batalha Naval.
-// Siga os comentários para implementar cada parte do desafio.
+#define tamNavio 3         // tamanho fixo dos navios até o momento
+#define defNavio '1'         // valor representando um navio no tabuleiro
+#define defAgua '0'          // valor representando água
+
+int posicionamento(){
+  char entrada;
+
+  printf("\n Digite o caracter do eixo você quer colocar o seu navio? (H)Horizontal, (V)ertical (\\)Contra-Diagonal ou (/)Diagonal?\n ");
+    while(1) {
+      scanf(" %c", &entrada);  // espaço antes do %c ignora lixo do buffer
+      entrada = toupper(entrada);
+
+      if (entrada == 'H' || entrada == 'V' || entrada == '\\' || entrada == '/') {
+          switch(entrada){
+            case 'H':
+              printf("Horizontal");
+              return 0;
+              break;
+            case 'V':
+              printf("Vertical");
+              return 1;
+              break;
+            case '\\':
+              printf("Contra-Diagonal");
+              return 2;
+              break;
+            case '/':
+              printf("Diagonal");
+              return 3;
+              break;
+          }
+      } else {
+          printf( "Comando Inválido! Tente novamente.\n ");
+      }
+      }
+}
+
+int localizacaoY(){
+  char entrada;
+  printf("\n Digite a letra da coluna que você quer colocar o seu navio?(A-I)\n ");
+  while(1) {
+    scanf(" %c", &entrada);  // espaço antes do %c ignora lixo do buffer
+    entrada = toupper(entrada);
+    if (entrada >= 'A' && entrada <= 'I') {
+        printf("Coluna: %c", entrada);
+      return entrada - 64;
+    } else {
+        printf( "Comando Inválido! Tente novamente.\n ");
+    }
+  }
+};
+
+int localizacaoX(){
+  char entrada;
+  printf("\n Digite o número da linha que você quer colocar o seu navio?(1-9)\n ");
+  while(1){
+    scanf(" %c", &entrada);
+    if (entrada >= '1' && entrada <= '9'){
+      printf("Linha: %d", entrada - 48);
+      return entrada - 48;
+    } else {
+        printf( "Comando Inválido! Tente novamente.\n ");
+    }
+  }
+}
 
 int main() {
-    // Nível Novato - Posicionamento dos Navios
-    // Sugestão: Declare uma matriz bidimensional para representar o tabuleiro (Ex: int tabuleiro[5][5];).
-    // Sugestão: Posicione dois navios no tabuleiro, um verticalmente e outro horizontalmente.
-    // Sugestão: Utilize `printf` para exibir as coordenadas de cada parte dos navios.
 
-    // Nível Aventureiro - Expansão do Tabuleiro e Posicionamento Diagonal
-    // Sugestão: Expanda o tabuleiro para uma matriz 10x10.
-    // Sugestão: Posicione quatro navios no tabuleiro, incluindo dois na diagonal.
-    // Sugestão: Exiba o tabuleiro completo no console, mostrando 0 para posições vazias e 3 para posições ocupadas.
+  // Inicializa o tabuleiro 10x10.
+  char * tabuleiro[10][10] = {{0}};
 
-    // Nível Mestre - Habilidades Especiais com Matrizes
-    // Sugestão: Crie matrizes para representar habilidades especiais como cone, cruz, e octaedro.
-    // Sugestão: Utilize estruturas de repetição aninhadas para preencher as áreas afetadas por essas habilidades no tabuleiro.
-    // Sugestão: Exiba o tabuleiro com as áreas afetadas, utilizando 0 para áreas não afetadas e 1 para áreas atingidas.
+  // Inicializa o tabuleiro com água (0), mas não exibe
+  for (int i = 0; i<10; i++){
+    printf("\n");
+    for (int j = 0; j<10; j++){
+        if (i == 0 && j == 0){
+        tabuleiro[i][j] = ' ';
+      } else if (i == 0) {
+        tabuleiro[i][j] = 'A' -1 + j;
+      } else if (j == 0) {
+        tabuleiro[i][j] = '0' + i;
+      } else {
+        tabuleiro[i][j] = defAgua;
+      }
+      printf("%c ", tabuleiro[i][j]);
+    }
+  }
 
-    // Exemplos de exibição das habilidades:
-    // Exemplo para habilidade em cone:
-    // 0 0 1 0 0
-    // 0 1 1 1 0
-    // 1 1 1 1 1
-    
-    // Exemplo para habilidade em octaedro:
-    // 0 0 1 0 0
-    // 0 1 1 1 0
-    // 0 0 1 0 0
+  // Coordenadas iniciais do primeiro navio
+  int tipoPose = posicionamento(); // 0 horizontal, 1 vertical, 2 contra-diagonal, 3 diagonal
+  int eixoX = localizacaoX(); // Criar Colunas de 1 a 9
+  int eixoY = localizacaoY(); // Criar Linhas de A a I
 
-    // Exemplo para habilidade em cruz:
-    // 0 0 1 0 0
-    // 1 1 1 1 1
-    // 0 0 1 0 0
+    printf("\n");
+    system("clear");
 
-    return 0;
+  switch(tipoPose){
+    case 0:
+      for (int i = 0; i < tamNavio; i++){
+        if (eixoY >= 8) {
+          tabuleiro[eixoX][7 + i] = defNavio;
+        } else {
+          tabuleiro[eixoX][eixoY + i] = defNavio;
+        }
+      };
+    break;
+    case 1:
+      for (int i = 0; i < tamNavio; i++){
+        if (eixoX >= 8){
+          tabuleiro[7 + i][eixoY] = defNavio;
+        } else {
+          tabuleiro[eixoX + i][eixoY] = defNavio;
+        }
+      };
+    break;
+    case 2:
+      for (int i = 0; i < tamNavio; i++){
+        if (eixoX >= 8 && eixoY >= 8){
+          tabuleiro[7 + i][7 + i] = defNavio;
+        } else if (eixoX >= 8){
+          tabuleiro[7 + i][eixoY + i] = defNavio;
+        } else if (eixoY >= 8){
+          tabuleiro[eixoX + i][7 + i] = defNavio;
+        } else {
+          tabuleiro[eixoX + i][eixoY + i] = defNavio;
+        }
+      };
+    break;
+    default:
+      for (int i = 0; i < tamNavio; i++){
+        if (eixoX <= 2 && eixoY >= 2){
+          tabuleiro[3 - i][7 + i] = defNavio;
+        } else if (eixoX >= 2){
+          tabuleiro[3 - i][eixoY + i] = defNavio;
+        } else if (eixoY >=2){
+          tabuleiro[eixoX - i][3 + i] = defNavio;
+        } else {
+          tabuleiro[eixoX - i][eixoY + i] = defNavio;
+        }
+      }
+    break;
+  }
+  
+  for (int i = 0; i<10; i++){
+    printf("\n");
+    for (int j = 0; j<10; j++){
+      printf("%c ", tabuleiro[i][j]);
+    }
+  }
+
+  return 0;
 }
