@@ -1,12 +1,16 @@
 #include <stdio.h>
+#include <ctype.h>
 
-#define tamNavio 3            // tamanho fixo dos navios até o momento
-#define defNavio '3'          // valor representando um navio no tabuleiro
-#define defAgua '='           // valor representando água
-#define LINHA 11              // tamanho do tabuleiro + Cabeçalho
-#define COLUNA 11             // tamanho do tabuleiro + Cabeçalho
+#define tamNavio 3         // tamanho fixo dos navios até o momento
+#define defNavio '3'         // valor representando um navio no tabuleiro
+#define defAgua '='          // valor representando água
+#define defAcerto 'X'        // valor representando um acerto
+#define defErro 'M'          // valor representando um erro
+#define LINHA 11             // tamanho do tabuleiro + Cabeçalho
+#define COLUNA 11          // tamanho do tabuleiro + Cabeçalho
+#define HABILIDADE 5        // Range de habilidades
 
-int posicionamento(){         //Escolher a posição do bloco do navio a ser colocado
+int posicionamento(){
   char entrada;
 
   printf("\n Digite o caracter do eixo você quer colocar o seu navio?\n (H)Horizontal\n (V)ertical\n (\\)Contra-Diagonal\n (/)Diagonal?\n ");
@@ -17,19 +21,19 @@ int posicionamento(){         //Escolher a posição do bloco do navio a ser col
       if (entrada == 'H' || entrada == 'V' || entrada == '\\' || entrada == '/') {
           switch(entrada){
             case 'H':
-              printf("Horizontal");
+              printf(" Horizontal");
               return 0;
               break;
             case 'V':
-              printf("Vertical");
+              printf(" Vertical");
               return 1;
               break;
             case '\\':
-              printf("Contra-Diagonal");
+              printf(" Contra-Diagonal");
               return 2;
               break;
             case '/':
-              printf("Diagonal");
+              printf(" Diagonal");
               return 3;
               break;
           }
@@ -39,14 +43,14 @@ int posicionamento(){         //Escolher a posição do bloco do navio a ser col
     }
 }
 
-int localizacaoY(){           // Posição do Inicio do navio(Queria que fosse o meio, mas já comecei assim)
+int localizacaoY(){
   char entrada;
-  printf("\n Digite a letra da coluna que você quer colocar o seu navio?(A-J)\n ");
+  printf("\n Digite a letra da coluna da cordenada?(A-J)\n ");
   while(1) {
     scanf(" %c", &entrada);  // espaço antes do %c ignora lixo do buffer
     entrada = toupper(entrada);
     if (entrada >= 'A' && entrada <= 'J') {
-        printf("Coluna: %c", entrada);
+        printf(" Coluna: %c", entrada);
       return entrada - 64;
     } else {
         printf( "Comando Inválido! Tente novamente.\n ");
@@ -54,13 +58,13 @@ int localizacaoY(){           // Posição do Inicio do navio(Queria que fosse o
   }
 };
 
-int localizacaoX(){         // Posição do Inicio do navio(Queria que fosse o meio, mas já comecei assim)
+int localizacaoX(){
   char entrada;
-  printf("\n Digite o número da linha que você quer colocar o seu navio?(0-9)\n ");
+  printf("\n Digite o número da linha da cordenada?(0-9)\n ");
   while(1){
     scanf(" %c", &entrada);
     if (entrada >= '0' && entrada <= '9'){
-      printf("Linha: %d", entrada - 47);
+      printf(" Linha: %d", entrada - '0');
       return entrada - '0' + 1;
     } else {
         printf( "Comando Inválido! Tente novamente.\n ");
@@ -68,7 +72,7 @@ int localizacaoX(){         // Posição do Inicio do navio(Queria que fosse o m
   }
 }
 
-void exibirTabuleiro(char tabuleiro[11][11]) { // Atualização do Tabuleiro, após o mesmo ter sido criado
+void exibirTabuleiro(char tabuleiro[11][11]) {
     for (int i = 0; i < 11; i++) {
         printf("\n");
         for (int j = 0; j < 11; j++) {
@@ -78,7 +82,7 @@ void exibirTabuleiro(char tabuleiro[11][11]) { // Atualização do Tabuleiro, ap
     printf("\n");
 }
 
-int posicionarNavio(char tabuleiro[11][11], int tipoPose, int eixoX, int eixoY){ // Aplicar o Navio no mapa
+int posicionarNavio(char tabuleiro[11][11], int tipoPose, int eixoX, int eixoY){
 
   if (tabuleiro[eixoX][eixoY] != defAgua){ 
   printf("\n Não foi possível posicionar o navio!\n Tente novamente.");
@@ -137,10 +141,103 @@ int posicionarNavio(char tabuleiro[11][11], int tipoPose, int eixoX, int eixoY){
   return 1;
 }}
 
+int selecaoDeAtaque(){
+  printf("\n Digite o tipo de ataque ao qual quer realizar?\n (1)Cone\n (2)Cruz\n (3)Octaedro\n ");
+  int entrada = 0;
+  scanf(" %d", &entrada);
+  do {
+    scanf(" %d", &entrada);
+    if (entrada < 1 || entrada > 3) {
+      printf("Comando Inválido! Tente novamente.\n ");
+    };
+  } while (entrada < 1 || entrada > 3);
+  switch(entrada){
+    case 1:
+      printf(" Cone");
+      return 1;
+      break;
+    case 2:
+      printf(" Cruz");
+      return 2;
+      break;
+    default:
+      printf(" Octaedro");
+      return 3;
+      break;
+  }
+};
+
+void criarAtaque(int habilidade[HABILIDADE][HABILIDADE], int tipo){
+  int centro = HABILIDADE/2;
+  switch(tipo){
+    case 1:
+      // Cone
+      for(int i = 0; i < HABILIDADE; i++){
+        for(int j = 0; j < HABILIDADE; j++){
+          if (j >= centro - i && j <= centro + i && i <= centro){
+            habilidade[i][j] = 1;
+          } else {
+            habilidade[i][j] = 0;
+          }
+        }
+      }
+      break;
+    case 2:
+      // Cruz
+      for(int i = 0; i < HABILIDADE; i++){
+        for(int j = 0; j < HABILIDADE; j++){
+          if ( i == centro || j == centro){
+            habilidade[i][j] = 1;
+          } else {
+            habilidade[i][j] = 0;
+          }
+        }  
+      }
+      break;
+    default:
+      // Octaedro
+      for(int i = 0; i < HABILIDADE; i++){
+        for(int j = 0; j < HABILIDADE; j++){
+          if (i == centro || j == centro || i == j || i + j == HABILIDADE - 1){
+            habilidade[i][j] = 1;
+          } else {
+            habilidade[i][j] = 0;
+          }
+        }
+      }
+      break;
+  }  
+}
+
+void aplicarAtaque( char tabuleiro[LINHA][COLUNA], 
+                    int habilidade[HABILIDADE][HABILIDADE], 
+                    int eixoX, int eixoY, int *vida){
+  
+  int centro = HABILIDADE/2;
+
+  for(int i = 0; i < HABILIDADE; i++){
+    for(int j = 0; j < HABILIDADE; j++){
+      int x = eixoX + i - centro;
+      int y = eixoY + j - centro;
+
+      if (x >= 0 && x < LINHA && y >= 0 && y < COLUNA){
+        if (habilidade[i][j] == 1 && tabuleiro[x][y] == defAgua) {
+          tabuleiro[x][y] = defErro;
+        } else if (habilidade[i][j] == 1 && tabuleiro[x][y] == defNavio) {
+          (*vida)--;
+          tabuleiro[x][y] = defAcerto;
+        }
+      }
+    }
+  }
+};
+  
 int main() {
   // Inicializa o tabuleiro 10x10.
   char tabuleiro[LINHA][COLUNA] = {{0}};
+  int habilidade[HABILIDADE][HABILIDADE] = {{0}};
   int countNavios = 0;
+  int vida = 0;
 
   // Inicializa o tabuleiro com água (0), mas não exibe
   for (int i = 0; i<LINHA; i++){
@@ -159,18 +256,49 @@ int main() {
 
   exibirTabuleiro(tabuleiro);
 
-  while (countNavios < 4){ // Colocar 4 Navios pelo menos. Começa em 0 e vai até 3... logo 4 návios.
+  while (countNavios < 4){
 
     int tipoPose = posicionamento(); // 0 horizontal, 1 vertical, 2 contra-diagonal, 3 diagonal
+    printf("\n Agora escolha a localização do navio:");
     int eixoX = localizacaoX(); // Criar Colunas de 1 a 9
     int eixoY = localizacaoY(); // Criar Linhas de A a I
 
     printf("\n");
-    system("clear"); //Apagar o antigo mapa para exibir o novo
+    #ifdef _WIN32
+      system("cls");
+    #else
+      system("clear");
+    #endif
+
 
     countNavios += posicionarNavio(tabuleiro, tipoPose, eixoX, eixoY);
+    vida += tamNavio;
     exibirTabuleiro(tabuleiro);
-    
   }
+
+  int end = 0; // variável de finalização do jogo;
+
+  while (vida != 0) {
+    int tipo = selecaoDeAtaque();
+    int eixoX = localizacaoX();
+    int eixoY = localizacaoY();
+    criarAtaque(habilidade, tipo);
+    
+    //verificarAtaque(habilidade);
+    aplicarAtaque(tabuleiro, habilidade, eixoX, eixoY, &vida);
+
+    printf("\n");
+    #ifdef _WIN32
+      system("cls");
+    #else
+      system("clear");
+    #endif
+
+    
+    exibirTabuleiro(tabuleiro);
+  }
+  printf("\n Você venceu!");
+  // Coordenadas iniciais do primeiro navio
   return 0;
 }
+
